@@ -20,12 +20,6 @@ app.use(passport.initialize());
 // initialize router
 var router = express.Router();
 
-
-router.use(function(req, res, next) {
-    console.log(req.method, req.url);
-    next();
-})
-
 mongoose.connect(process.env.DB , (err, database) => {
                  if (err) throw err;
                  console.log("Connected to the database.");
