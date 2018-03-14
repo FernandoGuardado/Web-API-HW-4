@@ -75,23 +75,23 @@ router.route('/users')
 // /signup route
 router.post('/signup', function(req, res) {
             if (!req.body.username || !req.body.password) {
-            res.json({ success: false, message: 'Please pass username and password.' });
+            res.json({success: false, msg: 'Please pass username and password.'});
             }
             else {
             var user = new User();
             user.name = req.body.name;
             user.username = req.body.username;
             user.password = req.body.password;
-            res.json({ success: true });
             // save the user
             user.save(function(err) {
                       if (err) {
                       // duplicate entry
-                      if (err.code === 11000)
-                      return res.json({ success: false, message: 'A user with that username already exists.' });
+                      if (err.code == 11000)
+                      return res.json({ success: false, message: 'A user with that username already exists. '});
                       else
                       return res.send(err);
                       }
+                      
                       res.json({ message: 'User created!' });
                       });
             }
