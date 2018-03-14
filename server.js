@@ -78,6 +78,7 @@ router.post('/signup', function(req, res) {
             res.json({ success: false, message: 'Please pass username and password.' });
             }
             else {
+            res.json({ success: true});
             var user = new User();
             user.name = req.body.name;
             user.username = req.body.username;
