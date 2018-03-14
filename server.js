@@ -85,8 +85,8 @@ router.post('/signup', function(req, res) {
             //res.json({success: true, msg: 'got to set values'});
             // save the user
             user.save(function(err) {
+                      if (err) {
                       // duplicate entry
-                      res.json({success: true, msg: 'got to set save'});
                       if (err.code == 11000)
                       return res.json({ success: false, message: 'A user with that username already exists. '});
                       else
