@@ -92,10 +92,9 @@ router.post('/signup', function(req, res) {
                       else
                       return res.send(err);
                       }
-                      
+                      res.json({ success: true })
                       res.json({ message: 'User created!' });
                       });
-            res.json({ success: true })
             }
             });
 //===============================================================================================
