@@ -73,20 +73,27 @@ router.route('/users')
     });
 //===============================================================================================
 // /signup route
-router.post('/signup', (req, res) => {
-            if (!req.body.username || !req.body.password || !req.body.name) {
-            res.status(422).json({success: false, msg: 'Please pass username, name, and password.'});
-            } else {
-            var newUser = new User(req.body);
-            
+router.post('/signup', function(req, res) {
+            if (!req.body.username || !req.body.password) {
+            res.json({success: false, msg: 'Please pass username and password.'});
+            }
+            else {
+            var user = new User();
+            user.name = req.body.name;
+            user.username = req.body.username;
+            user.password = req.body.password;
             // save the user
-            newUser.save()
-            .then(item => {
-                  res.json({success: true, msg: 'Successful created new user.'});
-                  })
-            .catch(err => {
-                   res.status(422).send("Unable to save to database");
-                   });
+            user.save(function(err) {
+                      if (err) {
+                      // duplicate entry
+                      if (err.code == 11000)
+                      return res.json({ success: false, message: 'A user with that username already exists. '});
+                      else
+                      return res.send(err);
+                      }
+                      
+                      res.json({ message: 'User created!' });
+                      });
             }
             });
 //===============================================================================================
