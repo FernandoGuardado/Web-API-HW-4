@@ -1,5 +1,3 @@
-// Fernando Guardado
-// User Schema & Hash Password
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var bcrypt = require('bcrypt-nodejs');
@@ -29,8 +27,6 @@ UserSchema.pre('save', function(next) {
         next();
     });
 });
-
-// check if password matches
 
 UserSchema.methods.comparePassword = function(password, callback) {
     var user = this;

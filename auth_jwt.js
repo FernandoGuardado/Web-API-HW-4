@@ -1,11 +1,8 @@
-// Fernando Guardado
-// file to authorize users & authenticate SECRET_KEY
-
+// Load required packages
 var passport = require('passport');
 var JwtStrategy = require('passport-jwt').Strategy;
 var ExtractJwt = require('passport-jwt').ExtractJwt;
 var User = require('./Users');
-var dotenv = require('dotenv').config();
 
 var opts = {};
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme("jwt");
