@@ -7,7 +7,7 @@ var User = require('./Users');
 var jwt = require('jsonwebtoken');
 var Movie = require('./Movies');
 var dotenv = require('dotenv').config();
-var mongoose = require('mongoose');
+//var mongoose = require('mongoose');
 
 
 // creates application
