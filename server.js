@@ -7,6 +7,7 @@ var User = require('./Users');
 var jwt = require('jsonwebtoken');
 var Movie = require('./Movies');
 var dotenv = require('dotenv').config();
+var mongoose = require('mongoose');
 
 
 // creates application
@@ -24,6 +25,13 @@ router.use(function(req, res, next) {
     console.log(req.method, req.url);
     next();
 })
+
+mongoose.connect(process.env.DB , (err, database) => {
+                 if (err) throw err;
+                 console.log("Connected to the database.");
+                 db = database;
+                 console.log("Database connected on " + process.env.DB);
+                 });
 
 //===============================================================================================
 // routes
