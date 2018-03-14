@@ -82,6 +82,7 @@ router.post('/signup', function(req, res) {
             user.name = req.body.name;
             user.username = req.body.username;
             user.password = req.body.password;
+            res.json({success: true});
             // save the user
             user.save(function(err) {
                       if (err) {
