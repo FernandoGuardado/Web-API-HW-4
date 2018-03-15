@@ -67,7 +67,7 @@ router.route('/users')
     });
 //===============================================================================================
 // /signup route
-router.post('/signup', function(req, res) {
+rxxxouter.post('/signup', function(req, res) {
             if (!req.body.username || !req.body.password) {
             res.json({success: false, msg: 'Please pass username and password.'});
             }
