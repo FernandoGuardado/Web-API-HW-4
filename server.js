@@ -16,8 +16,6 @@ var rp = require('request-promise');
 // port stuff
 var port = process.env.PORT || 8080;
 
-const TRACKING_ID = process.env.TRACKING_ID;
-
 // creates application
 var app = express();
 app.use(bodyParser.json());
@@ -320,40 +318,6 @@ router.route('/moviereviews')
                 res.json({ movie: movie });
             })
         }
-    });
-
-//===============================================================================================
-// google analytics stuff
-function trackDimension(category, action, label, value, dimension1, metric1) {
-
-    var options = { method: 'GET',
-        url: 'https://www.google-analytics.com/collect',
-        qs:
-            {
-                v: '1',
-                tid: TRACKING_ID,
-                cid: crypto.randomBytes(16).toString("hex"),
-                t: 'event',
-                ec: category,
-                ea: action,
-                el: label,
-                ev: value,
-                cd1: dimension1,
-                cm1: metric1
-            },
-        headers:
-            {  'Cache-Control': 'no-cache' } };
-
-    return rp(options);
-}
-
-router.route('/test')
-    .get(function (req, res) {
-        trackDimension('Review', 'Rating', 'Movie Review', '3', 'Deadpool', '1')
-            .then(function (response) {
-                console.log(response.body);
-                res.status(200).send('Event tracked.').end();
-            })
     });
     //===============================================================================================
 app.use('/', router);
