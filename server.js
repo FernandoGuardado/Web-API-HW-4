@@ -133,7 +133,7 @@ router.route('/movies')
       if (!req.body.title || !req.body.year || !req.body.genre || !req.body.actors) {
       res.json({ success: false, message: 'You have entered the movie information incorrectly. You need to include: Title, Year, Genre & Actors (Actor Name & Character Name).' });
       }
-      else if (req.body.actors.length <= 2) {
+      else if (req.body.actors.length <= 2 || req.body.actors.length == 1) {
       res.json({ success: false, message: 'Please add at atleast three actors to the movie. Must have the actor name & character name which they played. Format: (Actor Name, Character Name).' })
       }
       else {
