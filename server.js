@@ -162,7 +162,7 @@ router.route('/movies')
                  else
                  return res.send(err);
                  }
-                 res.json({ message: 'Movie has been created...' });
+                 res.json({ message: req.body.title +  ' has been created & added to the database.' });
                  });
       }
       })
@@ -210,7 +210,7 @@ router.route('/movies')
         Movie.findByIdAndRemove(req.body._id,function (err, movie) {
             if (err) res.send(err);
                                 
-            res.json({ message: req.body.title + 'has been deleted from the database.'});
+            res.json({ message: req.body.title + ' has been deleted from the database.'});
             });
         });
 //===============================================================================================
