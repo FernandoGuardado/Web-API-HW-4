@@ -209,12 +209,8 @@ router.route('/movies')
 .delete(authJwtController.isAuthenticated, function (req, res) {
         Movie.findByIdAndRemove(req.body._id,function (err, movie) {
             if (err) res.send(err);
-            else if(req.body._id != req.body._id)
-            {
-                res.json({message: 'ID does not match a Movie ID in the Database...'})
-            } else{
-                res.json({ message: 'Movie has been deleted from the database...' })
-            }
+                                
+            res.json({ message: 'Movie has been deleted from the database...' });
             });
         });
 //===============================================================================================
