@@ -212,10 +212,10 @@ router.route('/movies')
             else if(!req.body._id)
             {
                 res.json({message: 'ID does not match a Movie ID in the Database...'})
-            }                    
-            else {
-                res.json({ message: 'Movie has been deleted from the database...' });
+            } else{
+                res.json({ message: 'Movie has been deleted from the database...' })
             }
+            });
         });
 //===============================================================================================
 app.use('/', router);
