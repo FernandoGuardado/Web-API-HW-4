@@ -1,26 +1,26 @@
 // Fernando Guardado
-var express = require('express');
-var bodyParser = require('body-parser');
-var passport = require('passport');
-var authJwtController = require('./auth_jwt');
-var User = require('./Users');
-var jwt = require('jsonwebtoken');
-var Movie = require('./Movies');
+import express, { Router } from "express";
+import { json, urlencoded } from "body-parser";
+import { initialize } from "passport";
+import { isAuthenticated } from "./auth_jwt";
+import User, { findById, find, findOne } from "./Users";
+import { sign } from "jsonwebtoken";
+import Movie, { find as _find, findById as _findById, findByIdAndRemove } from "./Movies";
 var dotenv = require('dotenv').config();
-var mongoose = require('mongoose');
+import { connect } from "mongoose";
 
 
 // creates application
 var app = express();
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(json());
+app.use(urlencoded({ extended: false }));
 
-app.use(passport.initialize());
+app.use(initialize());
 
 // initialize router
-var router = express.Router();
+var router = Router();
 
-mongoose.connect(process.env.DB , (err, database) => {
+connect(process.env.DB , (err, database) => {
                  if (err) throw err;
                  console.log("Connected to the database.");
                  db = database;
@@ -32,7 +32,7 @@ mongoose.connect(process.env.DB , (err, database) => {
 //===============================================================================================
 // /postjwt route
 router.route('/postjwt')
-    .post(authJwtController.isAuthenticated, function (req, res) {
+    .post(isAuthenticated, function (req, res) {
             console.log(req.body);
             res = res.status(200);
             if (req.get('Content-Type')) {
@@ -45,9 +45,9 @@ router.route('/postjwt')
 //===============================================================================================
 // /users/:userID route
 router.route('/users/:userId')
-    .get(authJwtController.isAuthenticated, function (req, res) {
+    .get(isAuthenticated, function (req, res) {
         var id = req.params.userId;
-        User.findById(id, function(err, user) {
+        findById(id, function(err, user) {
             if (err) res.send(err);
 
             var userJson = JSON.stringify(user);
@@ -58,8 +58,8 @@ router.route('/users/:userId')
 //===============================================================================================
 // /users route
 router.route('/users')
-    .get(authJwtController.isAuthenticated, function (req, res) {
-        User.find(function (err, users) {
+    .get(isAuthenticated, function (req, res) {
+        find(function (err, users) {
             if (err) res.send(err);
             // return the users
             res.json(users);
@@ -98,13 +98,13 @@ router.post('/signin', function(req, res) {
     userNew.username = req.body.username;
     userNew.password = req.body.password;
 
-    User.findOne({ username: userNew.username }).select('name username password').exec(function(err, user) {
+    findOne({ username: userNew.username }).select('name username password').exec(function(err, user) {
         if (err) res.send(err);
 
         user.comparePassword(userNew.password, function(isMatch){
             if (isMatch) {
                 var userToken = {id: user._id, username: user.username};
-                var token = jwt.sign(userToken, process.env.SECRET_KEY);
+                var token = sign(userToken, process.env.SECRET_KEY);
                 res.json({success: true, token: 'JWT ' + token});
             }
             else {
@@ -119,8 +119,8 @@ router.post('/signin', function(req, res) {
 // /movies route
 router.route('/movies')
 //get all movies
-.get(authJwtController.isAuthenticated, function (req, res) {
-     Movie.find(function (err, movies) {
+.get(isAuthenticated, function (req, res) {
+    _find(function (err, movies) {
                 //if error, send error
                 if (err) res.send(err);
                 
@@ -129,7 +129,7 @@ router.route('/movies')
                 });
      })
 //create a new movie
-.post(authJwtController.isAuthenticated, function (req, res) {
+.post(isAuthenticated, function (req, res) {
       if (!req.body.title || !req.body.year || !req.body.genre || !req.body.actors) {
       res.json({ success: false, message: 'You have entered the movie information incorrectly. You need to include: Title, Year, Genre & Actors (Actor Name & Character Name).' });
       }
@@ -160,8 +160,8 @@ router.route('/movies')
       }
       })
 //update a movie
-.put(authJwtController.isAuthenticated, function (req, res) {
-     Movie.findById(req.body._id,function (err, movie) {
+.put(isAuthenticated, function (req, res) {
+    _findById(req.body._id,function (err, movie) {
                     if (err) {
                     res.send(err);
                     }
@@ -192,13 +192,13 @@ router.route('/movies')
                     });
      })
 //delete a movie
-.delete(authJwtController.isAuthenticated, function (req, res) {
-        Movie.findByIdAndRemove(req.body._id,function (err, movie) {
+.delete(isAuthenticated, function (req, res) {
+    findByIdAndRemove(req.body._id,function (err, movie) {
                                 if (err) res.send(err);
                                 
                                 res.json({ message: 'Movie has been deleted from the database...' });
                                 });
         });
 //===============================================================================================
-//app.use('/', router);
+app.use('/', router);
 app.listen(process.env.PORT || 8080);
