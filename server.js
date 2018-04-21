@@ -16,7 +16,7 @@ var rp = require('request-promise');
 // port stuff
 var port = process.env.PORT || 8080;
 
-const GA_TRACKING_ID = process.env.GA_KEY;
+const TRACKING_ID = process.env.TRACKING_ID;
 
 // creates application
 var app = express();
@@ -331,7 +331,7 @@ function trackDimension(category, action, label, value, dimension1, metric1) {
         qs:
             {
                 v: '1',
-                tid: GA_TRACKING_ID,
+                tid: TRACKING_ID,
                 cid: crypto.randomBytes(16).toString("hex"),
                 t: 'event',
                 ec: category,
