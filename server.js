@@ -200,7 +200,7 @@ router.route('/movies')
                                else
                                return res.send(err);
                                }
-                               res.json({ message: req.body.title +  ' has been created & added to the database.' });
+                               res.json({ message: req.body.title +  ' has been updated!' });
                                });
                     }
                     });
