@@ -82,11 +82,11 @@ router.post('/signup', function(req, res) {
                       if (err) {
                       // duplicate entry
                       if (err.code == 11000)
-                      return res.json({ success: false, message: 'A user with that username already exists. '});
+                      return res.json({ success: false, message: 'A user with that username already exists.'});
                       else
                       return res.send(err);
                       }
-                      res.json({ message: 'User created!' });
+                      res.json({ message: 'User created! Welcome ' + req.body.name + '!' });
                       });
             }
             });
@@ -158,7 +158,7 @@ router.route('/movies')
                  if (err) {
                  //duplicate entry
                  if (err.code === 11000)
-                 return res.json({ success: false, message: 'This movie already exists in the database!' });
+                 return res.json({ success: false, message: req.body.title + ' already exists in the database!' });
                  else
                  return res.send(err);
                  }
@@ -196,11 +196,11 @@ router.route('/movies')
                                if (err) {
                                // duplicate entry
                                if (err.code === 11000)
-                               return res.json({ success: false, message: 'This movie already exists!' });
+                               return res.json({ success: false, message: req.body.title + ' already exists in the database!' });
                                else
                                return res.send(err);
                                }
-                               res.json({ message: 'Movie has been updated...' });
+                               res.json({ message: req.body.title +  ' has been created & added to the database.' });
                                });
                     }
                     });
