@@ -6,9 +6,17 @@ var authJwtController = require('./auth_jwt');
 var User = require('./Users');
 var jwt = require('jsonwebtoken');
 var Movie = require('./Movies');
+var Review = require('./Reviews');
 var dotenv = require('dotenv').config();
 var mongoose = require('mongoose');
+var async = require('async');
+const crypto = require("crypto");
+var rp = require('request-promise');
+
+// port stuff
 var port = process.env.PORT || 8080;
+
+const GA_TRACKING_ID = process.env.GA_KEY;
 
 // creates application
 var app = express();
@@ -76,11 +84,10 @@ router.post('/signup', function(req, res) {
             user.name = req.body.name;
             user.username = req.body.username;
             user.password = req.body.password;
-            //res.json({success: true, msg: 'got to set values'});
-            // save the user
+            
             user.save(function(err) {
                       if (err) {
-                      // duplicate entry
+                      // duplicate
                       if (err.code == 11000)
                       return res.json({ success: false, message: 'A user with that username already exists.'});
                       else
@@ -118,17 +125,50 @@ router.post('/signin', function(req, res) {
 //===============================================================================================
 // /movies route
 router.route('/movies')
-//get all movies
+// get all movies
 .get(authJwtController.isAuthenticated, function (req, res) {
-     Movie.find(function (err, movies) {
-                //if error, send error
-                if (err) res.send(err);
-                
-                //return movies
-                res.json(movies);
+    var id = req.headers._id;
+    if (!id) {
+        console.log("Getting all movies...");
+        Movie.find(function (err, movies) {
+            
+            if (err) res.send(err);
+
+            //return movies
+            res.json(movies);
+        });
+    }
+
+    // get specific movie by ID
+    else {
+        console.log("Getting movie with movie ID " + req.headers._id);
+        Movie.findById(id, function (err, movie) {
+            if (err) res.send(err);
+
+            // if no reviews return movie info
+            if (req.headers.reviews === 'false') {
+                res.json(movie);
+            }
+
+            // return movie and reviews
+            else {
+                Review.find(function (err, reviews) {
+                    if (err) res.send(err);
+
+                    // find matching reviews for movie
+                    Review.find({ movietitle: movie.title }).exec(function (err, reviews) {
+                        if (err) res.send(err);
+                        res.json({
+                            movie: movie,
+                            reviews: reviews
+                        });
+                    });
                 });
-     })
-//create a new movie
+            }
+        });
+    }
+})
+// create a new movie
 .post(authJwtController.isAuthenticated, function (req, res) {
       if (!req.body.title) {
         res.json({ success: false, message: 'You have entered the movie information incorrectly. You where missing the title.' });
@@ -144,19 +184,19 @@ router.route('/movies')
       res.json({ success: false, message: 'Please add at atleast three actors to the movie.' })
       }
       else {
-      //create new movie object
+
       var movie = new Movie();
       
-      //add req object info to movie object
+      // set inputs to movie data
       movie.title = req.body.title;
       movie.year = req.body.year;
       movie.genre = req.body.genre;
       movie.actors = req.body.actors;
       
-      //save the movie object
+      // save
       movie.save(function(err) {
                  if (err) {
-                 //duplicate entry
+                 // duplicate
                  if (err.code === 11000)
                  return res.json({ success: false, message: req.body.title + ' already exists in the database!' });
                  else
@@ -166,7 +206,7 @@ router.route('/movies')
                  });
       }
       })
-//update a movie
+// update a movie
 .put(authJwtController.isAuthenticated, function (req, res) {
      Movie.findById(req.body._id,function (err, movie) {
                     if (err) {
@@ -194,7 +234,7 @@ router.route('/movies')
                     
                     movie.save(function(err) {
                                if (err) {
-                               // duplicate entry
+                               // duplicate
                                if (err.code === 11000)
                                return res.json({ success: false, message: req.body.title + ' already exists in the database!' });
                                else
@@ -214,5 +254,107 @@ router.route('/movies')
             });
         });
 //===============================================================================================
+// /reviews route
+router.post('/reviews/save', authJwtController.isAuthenticated, function (req,res) {
+
+    var token = req.body['authorization'];
+    var decoded = jwt.decode(token);
+    console.log(decoded);
+    var username = decoded['username'];
+
+    Movie.findOne({ title: req.body.movietitle }, function (err, movie) {
+        if (err) res.send(err);
+        if (!movie) {
+            res.json({ success: false, msg: req.body.movietitle + ' was not found.' })
+        }
+        else {
+            //create the new review
+            var review = new Review();
+            review.user = username;
+            review.movietitle = req.body.movietitle;
+            review.reviewquote = req.body.reviewquote;
+            review.rating = req.body.rating;
+
+            review.save(function(err) {
+                if (err) res.send(err);
+                res.json({ message: 'Review for ' + req.body.movietitle + ' has been submited.' })
+            });
+        }
+    })
+});
+
+// get all reviews
+router.get('/reviews', authJwtController.isAuthenticated, function (req,res) {
+    Review.find(function (err, reviews) {
+        if (err) res.send(err);
+        //return the users
+        res.json(reviews);
+    });
+});
+
+// get all movies and reviews
+router.route('/moviereviews')
+    .get(function (req, res) {
+        if (req.headers.reviews === 'true') {
+            Movie.aggregate([
+                {
+                    $lookup:{
+                        from: "reviews",
+                        localField: "title",
+                        foreignField: "movietitle",
+                        as: 'reviews'
+                    }
+                }
+            ], function (err, result) {
+                if (err) {
+                    res.send(err);
+                }
+                else res.send({ Movie: result });
+            });
+        }
+        else {
+            Movie.find({}, function (err, movies) {
+                if (err) {
+                    res.send(err);
+                }
+                res.json({ movie: movie });
+            })
+        }
+    });
+
+//===============================================================================================
+// google analytics stuff
+function trackDimension(category, action, label, value, dimension1, metric1) {
+
+    var options = { method: 'GET',
+        url: 'https://www.google-analytics.com/collect',
+        qs:
+            {
+                v: '1',
+                tid: GA_TRACKING_ID,
+                cid: crypto.randomBytes(16).toString("hex"),
+                t: 'event',
+                ec: category,
+                ea: action,
+                el: label,
+                ev: value,
+                cd1: dimension1,
+                cm1: metric1
+            },
+        headers:
+            {  'Cache-Control': 'no-cache' } };
+
+    return rp(options);
+}
+
+router.route('/test')
+    .get(function (req, res) {
+        trackDimension('Review', 'Rating', 'Movie Review', '3', 'Deadpool', '1')
+            .then(function (response) {
+                console.log(response.body);
+                res.status(200).send('Event tracked.').end();
+            })
+    });
+    //===============================================================================================
 app.use('/', router);
 app.listen(port);

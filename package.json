@@ -1,5 +1,5 @@
 {
-  "name": "Web-API-HW3",
+  "name": "Web-API-HW4",
   "version": "1.0.0",
   "description": "mongo database connected to MLab",
   "main": "server.js",
@@ -13,8 +13,12 @@
     "mongoose": "^5.0.10",
     "passport": "^0.4.0",
     "passport-http": "^0.3.0",
-    "passport-jwt": "^3.0.1"
+    "passport-jwt": "^3.0.1",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2"
   },
+
+
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
