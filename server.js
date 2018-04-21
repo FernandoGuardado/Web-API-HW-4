@@ -210,7 +210,7 @@ router.route('/movies')
         Movie.findByIdAndRemove(req.body._id,function (err, movie) {
             if (err) res.send(err);
                                 
-            res.json({ message: 'Movie has been deleted from the database...' });
+            res.json({ message: 'Movie has been deleted from the database...' + req.body.title});
             });
         });
 //===============================================================================================
