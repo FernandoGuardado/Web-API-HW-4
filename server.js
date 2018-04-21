@@ -172,12 +172,19 @@ router.route('/movies')
                     if (err) {
                     res.send(err);
                     }
-                    else if (!req.body.title || !req.body.year || !req.body.genre || !req.body.actors) {
-                    res.json({ success: false, message: 'You have entered the movie information incorrectly. You need to include: Title, Year, Genre & Actors (Actor Name & Character Name).' });
+                    else if (!req.body.title) {
+                        res.json({ success: false, message: 'You have entered the movie information incorrectly. You where missing the title.' });
+                      }
+                    else if(!req.body.year){
+                        res.json({ success: false, message: 'You have entered the movie information incorrectly. You where missing the year.' });
+                    }else if(!req.body.genre){
+                        res.json({ success: false, message: 'You have entered the movie information incorrectly. You where missing the genre.' });
+                    }else if(!req.body.actors){
+                        res.json({ success: false, message: 'You have entered the movie information incorrectly. You where missing at least one actor.' });
                     }
-                    else if (req.body.actors.length < 3)
+                    else if (req.body.actors.length <= 2)
                     {
-                    res.json({ success: false, message: 'Please add at atleast three actors to the movie. Must have the actor name & character name which they played. Format: (Actor Name, Character Name).' });
+                    res.json({ success: false, message: 'Please add at atleast three actors to the movie.' });
                     }
                     else {
                     movie.title = req.body.title;
@@ -189,7 +196,7 @@ router.route('/movies')
                                if (err) {
                                // duplicate entry
                                if (err.code === 11000)
-                               return res.json({ success: false, message: 'This movie already exists! -_-' });
+                               return res.json({ success: false, message: 'This movie already exists!' });
                                else
                                return res.send(err);
                                }
@@ -208,6 +215,4 @@ router.route('/movies')
         });
 //===============================================================================================
 app.use('/', router);
-app.listen(port, function(){
-    console.log("App is running on port " + port);
-}); 
+app.listen(port);
