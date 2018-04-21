@@ -8,7 +8,7 @@ var jwt = require('jsonwebtoken');
 var Movie = require('./Movies');
 var dotenv = require('dotenv').config();
 var mongoose = require('mongoose');
-
+var port = process.env.PORT || 8080;
 
 // creates application
 var app = express();
@@ -201,4 +201,6 @@ router.route('/movies')
         });
 //===============================================================================================
 app.use('/', router);
-app.listen(process.env.PORT || 8080);
+app.listen(port, function(){
+    console.log("App is running on port " + port);
+});
