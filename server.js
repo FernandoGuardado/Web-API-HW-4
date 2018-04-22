@@ -252,72 +252,99 @@ router.route('/movies')
             });
         });
 //===============================================================================================
-// /reviews route
-router.post('/reviews/save', authJwtController.isAuthenticated, function (req,res) {
+// // /reviews route
+// router.post('/reviews/save', authJwtController.isAuthenticated, function (req,res) {
 
-    var token = req.body['authorization'];
-    var decoded = jwt.decode(token);
-    console.log(decoded);
-    var username = decoded['username'];
+//     var token = req.body['authorization'];
+//     var decoded = jwt.decode(token);
+//     console.log(decoded);
+//     var username = decoded['username'];
 
-    Movie.findOne({ title: req.body.movietitle }, function (err, movie) {
-        if (err) res.send(err);
-        if (!movie) {
-            res.json({ success: false, msg: req.body.movietitle + ' was not found.' })
-        }
-        else {
-            //create the new review
-            var review = new Review();
-            review.user = username;
-            review.movietitle = req.body.movietitle;
-            review.reviewquote = req.body.reviewquote;
-            review.rating = req.body.rating;
+//     Movie.findOne({ title: req.body.movietitle }, function (err, movie) {
+//         if (err) res.send(err);
+//         if (!movie) {
+//             res.json({ success: false, msg: req.body.movietitle + ' was not found.' })
+//         }
+//         else {
+//             //create the new review
+//             var review = new Review();
+//             review.user = username;
+//             review.movietitle = req.body.movietitle;
+//             review.reviewquote = req.body.reviewquote;
+//             review.rating = req.body.rating;
 
-            review.save(function(err) {
-                if (err) res.send(err);
-                res.json({ message: 'Review for ' + req.body.movietitle + ' has been submited.' })
-            });
-        }
-    })
-});
+//             review.save(function(err) {
+//                 if (err) res.send(err);
+//                 res.json({ message: 'Review for ' + req.body.movietitle + ' has been submited.' })
+//             });
+//         }
+//     })
+// });
 
-// get all reviews
-router.get('/reviews', authJwtController.isAuthenticated, function (req,res) {
-    Review.find(function (err, reviews) {
-        if (err) res.send(err);
-        //return the users
-        res.json(reviews);
-    });
-});
+// // get all reviews
+// router.get('/reviews', authJwtController.isAuthenticated, function (req,res) {
+//     Review.find(function (err, reviews) {
+//         if (err) res.send(err);
+//         //return the users
+//         res.json(reviews);
+//     });
+// });
 
-// get all movies and reviews
-router.route('/moviereviews')
-    .get(function (req, res) {
-        if (req.headers.reviews === 'true') {
-            Movie.aggregate([
-                {
-                    $lookup:{
-                        from: "reviews",
-                        localField: "title",
-                        foreignField: "movietitle",
-                        as: 'reviews'
+// // get all movies and reviews
+// router.route('/moviereviews')
+//     .get(function (req, res) {
+//         if (req.headers.reviews === 'true') {
+//             Movie.aggregate([
+//                 {
+//                     $lookup:{
+//                         from: "reviews",
+//                         localField: "title",
+//                         foreignField: "movietitle",
+//                         as: 'reviews'
+//                     }
+//                 }
+//             ], function (err, result) {
+//                 if (err) {
+//                     res.send(err);
+//                 }
+//                 else res.send({ Movie: result });
+//             });
+//         }
+//         else {
+//             Movie.find({}, function (err, movies) {
+//                 if (err) {
+//                     res.send(err);
+//                 }
+//                 res.json({ movie: movie });
+//             })
+//         }
+//     });
+
+router.route('/reviews') //create a new review
+    .post(authJwtController.isAuthenticated, function (req, res) {
+
+        Movie.findOne({title : req.body.movieTitle}).select('title').exec(function (err, movie) {
+            if (err) res.status(400).send('problem with request');
+            if (movie) {
+                var reviewNew = new Review();
+
+                reviewNew.reviewerName = req.body.reviewerName;
+                reviewNew.movieTitle = req.body.movieTitle;
+                reviewNew.quote = req.body.quote;
+                reviewNew.rating = req.body.rating;
+
+                reviewNew.save(function (err) {
+                    if (err) {
+                        res.status(400).json({
+                            success: false,
+                            message: 'The review is missing a required field'
+                        });
                     }
-                }
-            ], function (err, result) {
-                if (err) {
-                    res.send(err);
-                }
-                else res.send({ Movie: result });
-            });
-        }
-        else {
-            Movie.find({}, function (err, movies) {
-                if (err) {
-                    res.send(err);
-                }
-                res.json({ movie: movie });
-            })
-        }
+                    else res.status(201).send('Review created!');
+                });
+            }
+            else res.status(400).send('movie does not exist, cannot post review');
+        });
     });
     //===============================================================================================
 app.use('/', router);
