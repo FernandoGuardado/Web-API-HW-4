@@ -22,15 +22,5 @@ passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
     });
 }));
 
-passport.use(new JwtStrategy(opts, function(jwt_payload, done){
-    Reviews.findById(jwt_payload.id, function (err, user){
-        if (user) {
-            done(null, user);
-        } else {
-            done(null, false);
-        }
-    });
-}));
-
 exports.isAuthenticated = passport.authenticate('jwt', { session : false });
 exports.secret = opts.secretOrKey ;
