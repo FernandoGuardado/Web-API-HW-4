@@ -326,14 +326,14 @@ router.route('/reviews') //create a new review
         Movie.findOne({title : req.body.movieTitle}).select('title').exec(function (err, movie) {
             if (err) res.status(400).send('problem with request');
             if (movie) {
-                var reviewNew = new Review();
+                var newReview = new Review();
 
-                reviewNew.reviewerName = req.body.reviewerName;
-                reviewNew.movieTitle = req.body.movieTitle;
-                reviewNew.quote = req.body.quote;
-                reviewNew.rating = req.body.rating;
+                newReview.user = req.body.user;
+                newReview.movieTitle = req.body.movieTitle;
+                newReview.quote = req.body.reviewBody;
+                newReview.rating = req.body.rating;
 
-                reviewNew.save(function (err) {
+                newReview.save(function (err) {
                     if (err) {
                         res.status(400).json({
                             success: false,
