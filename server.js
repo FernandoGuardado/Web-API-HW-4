@@ -270,7 +270,7 @@ router.post('/reviews/save', authJwtController.isAuthenticated, function (req,re
         else {
             //create the new review
             var review = new Review();
-            review.user = req.body.username;
+            review.user = req.body.username;    
             review.movietitle = req.body.movietitle;
             review.reviewquote = req.body.reviewquote;
             review.rating = req.body.rating;
@@ -283,44 +283,63 @@ router.post('/reviews/save', authJwtController.isAuthenticated, function (req,re
     })
 });
 
-// get all reviews
-router.get('/reviews', authJwtController.isAuthenticated, function (req,res) {
-    Review.find(function (err, reviews) {
-        if (err) res.send(err);
-        //return the users
-        res.json(reviews);
-    });
-});
+router.post('/reviews/newReview', authJwtController.isAuthenticated, function(req, res){
+    if (!req.body.username) {
+        res.json({ success: false, message: 'You have entered the review information wrong. You where missing the username!' });
+    }
+    else if(!req.body.movietitle) {
+        res.json({ success: false, message: 'You have entered the review information wrong. You where missing the movie title!' });
+    }
+    else if(!req.body.reviewquote) {
+        res.json({ success: false, message: 'You have entered the review information wrong. You where missing the review body!' });
+    }
+    else if(!req.body.rating) {
+        res.json({ success: false, message: 'You have entered the review information wrong. You where missing the review rating!' });
+    }
 
-// get all movies and reviews
-router.route('/moviereviews')
-    .get(function (req, res) {
-        if (req.headers.reviews === 'true') {
-            Movie.aggregate([
-                {
-                    $lookup:{
-                        from: "reviews",
-                        localField: "title",
-                        foreignField: "movietitle",
-                        as: 'reviews'
-                    }
-                }
-            ], function (err, result) {
-                if (err) {
-                    res.send(err);
-                }
-                else res.send({ Movie: result });
-            });
-        }
-        else {
-            Movie.find({}, function (err, movies) {
-                if (err) {
-                    res.send(err);
-                }
-                res.json({ movie: movie });
-            })
-        }
-    });
+    else{
+        var review = new Review();
+        res.jason({success: true, message: 'No errors'})
+    }
+
+// // get all reviews
+// router.get('/reviews', authJwtController.isAuthenticated, function (req,res) {
+//     Review.find(function (err, reviews) {
+//         if (err) res.send(err);
+//         //return the users
+//         res.json(reviews);
+//     });
+// });
+
+// // get all movies and reviews
+// router.route('/moviereviews')
+//     .get(function (req, res) {
+//         if (req.headers.reviews === 'true') {
+//             Movie.aggregate([
+//                 {
+//                     $lookup:{
+//                         from: "reviews",
+//                         localField: "title",
+//                         foreignField: "movietitle",
+//                         as: 'reviews'
+//                     }
+//                 }
+//             ], function (err, result) {
+//                 if (err) {
+//                     res.send(err);
+//                 }
+//                 else res.send({ Movie: result });
+//             });
+//         }
+//         else {
+//             Movie.find({}, function (err, movies) {
+//                 if (err) {
+//                     res.send(err);
+//                 }
+//                 res.json({ movie: movie });
+//             })
+//         }
+//     });
     //===============================================================================================
 app.use('/', router);
 app.listen(port);
