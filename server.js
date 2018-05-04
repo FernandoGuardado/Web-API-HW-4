@@ -270,7 +270,7 @@ router.post('/reviews/save', authJwtController.isAuthenticated, function (req,re
         else {
             //create the new review
             var review = new Review();
-            review.user = username;
+            review.user = req.body.username;
             review.movietitle = req.body.movietitle;
             review.reviewquote = req.body.reviewquote;
             review.rating = req.body.rating;
