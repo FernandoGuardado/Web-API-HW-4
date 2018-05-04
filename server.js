@@ -299,7 +299,7 @@ router.post('/reviews/newReview', authJwtController.isAuthenticated, function(re
 
     else{
         var review = new Review();
-        res.jason({success: true, message: 'No errors'})
+        res.jason({success: true, message: 'No errors'}) //
     }
 
 // // get all reviews
