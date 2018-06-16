@@ -1,5 +1,4 @@
 // Fernando Guardado
-// Movie Schema Jason File for Mongoose 
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
